@@ -844,7 +844,7 @@ def _make_auth_middleware(tokens: list[str]):
 def _load_config() -> Config:
     config_path = os.environ.get("PDNS_MCP_CONFIG", "/etc/pdns-mcp/config.toml")
     try:
-        return Config.from_file(config_path)
+        cfg = Config.from_file(config_path)
     except FileNotFoundError:
         if os.environ.get("PDNS_MCP_ALLOW_DEV_DEFAULTS") == "1":
             log.warning(
@@ -858,6 +858,13 @@ def _load_config() -> Config:
             "Create the config file or set PDNS_MCP_CONFIG to its path. "
             "Set PDNS_MCP_ALLOW_DEV_DEFAULTS=1 only for local development."
         )
+    # Allow env var to override api_key (config may use OVERRIDE_VIA_ENV placeholder).
+    # This lets the TOML ship without credentials while secrets are injected via
+    # EnvironmentFile in the systemd unit (PDNS_MCP_API_KEY=...).
+    env_api_key = os.environ.get("PDNS_MCP_API_KEY")
+    if env_api_key:
+        cfg.pdns.api_key = env_api_key
+    return cfg
 
 
 def main() -> None:
