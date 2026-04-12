@@ -1,0 +1,41 @@
+[Unit]
+Description=PowerDNS MCP Server
+Documentation=https://github.com/yourorg/pdns-mcp
+After=network.target pdns.service
+Wants=pdns.service
+
+[Service]
+Type=simple
+User=pdns-mcp
+Group=pdns-mcp
+
+# Config file path — override with environment variable if needed
+Environment=PDNS_MCP_CONFIG=/etc/pdns-mcp/config.toml
+
+ExecStart=/opt/pdns-mcp/venv/bin/python -m pdns_mcp.server
+
+# NOTE: The server explicitly runs with workers=1 (set in server.py).
+# The token store is in-memory and NOT safe for multi-worker deployments.
+# Do NOT add --workers flags here. If you need HA, implement shared token
+# storage (Redis/SQLite) before changing this.
+
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=60
+StartLimitBurst=3
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/pdns-mcp
+CapabilityBoundingSet=
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=pdns-mcp
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,33 @@
+# pdns-mcp configuration
+# Copy to /etc/pdns-mcp/config.toml and edit.
+
+[pdns]
+api_url   = "http://127.0.0.1:8081/api/v1"
+api_key   = "your-powerdns-api-key-here"
+server_id = "localhost"
+timeout_seconds = 10.0
+
+[server]
+# Bind to localhost by default. Change to 0.0.0.0 only when deploying to a
+# cluster where other nodes need access — and always set bearer_tokens first.
+host           = "127.0.0.1"
+port           = 8765
+log_level      = "INFO"
+audit_log_path = "/var/log/pdns-mcp/audit.jsonl"
+
+[policy]
+# Zones that cannot be modified through this server.
+# Trailing dots are added automatically if omitted.
+readonly_zones = []
+
+min_ttl                      = 60
+max_ttl                      = 86400
+token_ttl_seconds            = 60
+require_preview_on_delete_zone = true
+
+[auth]
+# Bearer tokens for Claude Code to authenticate with pdns-mcp.
+# This is NOT the PowerDNS API key — PDNS key stays server-side only.
+# Generate with: python3 -c "import secrets; print(secrets.token_hex(32))"
+# Leaving this empty disables auth — only do that on loopback-only deployments.
+bearer_tokens = ["REPLACE_WITH_GENERATED_TOKEN"]
