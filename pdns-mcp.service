@@ -1,6 +1,6 @@
 [Unit]
 Description=PowerDNS MCP Server
-Documentation=https://github.com/yourorg/pdns-mcp
+Documentation=https://github.com/kalkocz/pdns-mcp
 After=network.target pdns.service
 Wants=pdns.service
 
