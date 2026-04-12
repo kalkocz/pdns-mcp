@@ -14,6 +14,7 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from mcp.server.transport_security import TransportSecuritySettings
 
 from .audit import AuditLogger, NullAuditLogger
 from .config import Config, DEFAULT_DEV_CONFIG
@@ -891,6 +892,15 @@ def main() -> None:
     )
 
     import uvicorn
+
+    # Transport security: FastMCP's default TransportSecuritySettings only allows
+    # localhost, which blocks AgentGateway proxy requests (Host: server_ip:port →
+    # HTTP 421 Misdirected Request). When bound to 0.0.0.0/::, disable DNS
+    # rebinding protection — bearer token auth is the security layer instead.
+    if _config.server.host in ("0.0.0.0", "::"):
+        mcp.settings.transport_security = TransportSecuritySettings(
+            enable_dns_rebinding_protection=False
+        )
 
     # Get the MCP ASGI app and its own lifespan (starts the StreamableHTTP session
     # manager task group). We must compose WITH it, not replace it — mounting inside
