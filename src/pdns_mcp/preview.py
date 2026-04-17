@@ -653,8 +653,12 @@ class PreviewEngine:
 
         if change.operation in ("SET", "DELETE"):
             await client.patch_rrsets(change.zone, change.pdns_payload["rrsets"])
-            # Serial refresh is best-effort metadata — never fail the write over it
+            # Notify slaves and refresh serial — both best-effort, never fail the write
             serial: int | None = None
+            try:
+                await client.notify_zone(change.zone)
+            except Exception as exc:
+                log.warning("Post-write notify_zone failed (write succeeded): %s", exc)
             try:
                 zone_data = await client.get_zone(change.zone)
                 serial = zone_data.get("serial")
