@@ -369,9 +369,11 @@ METADATA_KINDS: dict[str, MetadataKindSpec] = {
     ),
     "PRESIGNED": MetadataKindSpec(
         kind="PRESIGNED",
-        description="Zone carries pre-made DNSSEC signatures. Set by PDNS on AXFR.",
+        description="Zone carries pre-made DNSSEC signatures. Set by PDNS on AXFR. "
+                    "Delete this metadata to re-enable soa_edit_api serial incrementing. "
+                    "Use preview_delete_metadata to clear it.",
         multi_value=False,
-        writable=False,
+        writable=True,
         example="1",
     ),
     "PUBLISH-CDNSKEY": MetadataKindSpec(
